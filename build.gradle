@@ -1,0 +1,70 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.2.5'
+	id 'io.spring.dependency-management' version '1.1.4'
+	id 'jacoco'
+}
+
+group = 'com.tutrit'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	sourceCompatibility = '21'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+	implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.data:spring-data-rest-hal-explorer'
+	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'com.h2database:h2'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'io.rest-assured:rest-assured:5.4.0'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.junit.platform:junit-platform-suite:1.10.2'
+
+	testImplementation 'io.cucumber:cucumber-java:7.0.0'
+	testImplementation 'io.cucumber:cucumber-spring:7.0.0'
+	testImplementation 'io.cucumber:cucumber-junit-platform-engine:7.0.0'
+	testImplementation 'io.cucumber:cucumber-junit:7.0.0'
+	testImplementation 'org.junit.platform:junit-platform-suite:1.10.2'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required = true
+		html.required = true
+	}
+}
+
+//cucumber {
+//	glue = 'com.tutrit.bdd.feature'
+//	features = 'src/test/resources/features'
+//	plugin = ['pretty', 'html:build/reports/cucumber.html']
+//}
+task cucumberReport(type: JavaExec) {
+	classpath = sourceSets.test.runtimeClasspath
+	main = 'io.cucumber.core.cli.Main'
+	args = ['--plugin', 'pretty', '--plugin', 'html:build/reports/cucumber/cucumber.html', '--plugin', 'json:build/reports/cucumber/cucumber.json', '--glue', 'com.tutrit.bdd.feature', 'src/test/resources/features']
+}
+
+check.dependsOn cucumberReport
